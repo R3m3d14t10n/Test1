@@ -1,0 +1,1782 @@
+package com.forumna ;
+import com.forumna.*;
+import com.genexus.*;
+import com.genexus.db.*;
+import com.genexus.webpanels.*;
+import java.sql.*;
+import com.genexus.search.*;
+
+public final  class login_impl extends GXDataArea
+{
+   public login_impl( com.genexus.internet.HttpContext context )
+   {
+      super(context);
+   }
+
+   public login_impl( int remoteHandle )
+   {
+      super( remoteHandle , new ModelContext( login_impl.class ));
+   }
+
+   public login_impl( int remoteHandle ,
+                      ModelContext context )
+   {
+      super( remoteHandle , context);
+   }
+
+   public void executeCmdLine( String args[] )
+   {
+      nGotPars = 1 ;
+      webExecute();
+   }
+
+   protected void createObjects( )
+   {
+      cmbavTipologin = new HTMLChoice();
+   }
+
+   public void initweb( )
+   {
+      initialize_properties( ) ;
+      if ( nGotPars == 0 )
+      {
+         entryPointCalled = false ;
+         gxfirstwebparm = httpContext.GetNextPar( ) ;
+         gxfirstwebparm_bkp = gxfirstwebparm ;
+         gxfirstwebparm = httpContext.DecryptAjaxCall( gxfirstwebparm) ;
+         toggleJsOutput = httpContext.isJsOutputEnabled( ) ;
+         if ( httpContext.isSpaRequest( ) )
+         {
+            httpContext.disableJsOutput();
+         }
+         if ( GXutil.strcmp(gxfirstwebparm, "dyncall") == 0 )
+         {
+            httpContext.setAjaxCallMode();
+            if ( ! httpContext.IsValidAjaxCall( true) )
+            {
+               GxWebError = (byte)(1) ;
+               return  ;
+            }
+            dyncall( httpContext.GetNextPar( )) ;
+            return  ;
+         }
+         else if ( GXutil.strcmp(gxfirstwebparm, "gxajaxEvt") == 0 )
+         {
+            httpContext.setAjaxEventMode();
+            if ( ! httpContext.IsValidAjaxCall( true) )
+            {
+               GxWebError = (byte)(1) ;
+               return  ;
+            }
+            gxfirstwebparm = httpContext.GetNextPar( ) ;
+         }
+         else if ( GXutil.strcmp(gxfirstwebparm, "gxfullajaxEvt") == 0 )
+         {
+            if ( ! httpContext.IsValidAjaxCall( true) )
+            {
+               GxWebError = (byte)(1) ;
+               return  ;
+            }
+            gxfirstwebparm = httpContext.GetNextPar( ) ;
+         }
+         else
+         {
+            if ( ! httpContext.IsValidAjaxCall( false) )
+            {
+               GxWebError = (byte)(1) ;
+               return  ;
+            }
+            gxfirstwebparm = gxfirstwebparm_bkp ;
+         }
+         if ( toggleJsOutput )
+         {
+            if ( httpContext.isSpaRequest( ) )
+            {
+               httpContext.enableJsOutput();
+            }
+         }
+      }
+      if ( ! httpContext.isLocalStorageSupported( ) )
+      {
+         httpContext.pushCurrentUrl();
+      }
+   }
+
+   public void webExecute( )
+   {
+      initweb( ) ;
+      if ( ! isAjaxCallMode( ) )
+      {
+         MasterPageObj= createMasterPage(remoteHandle, "com.forumna.wwpbaseobjects.workwithplusmasterpageempty");
+         MasterPageObj.setDataArea(this,false);
+         validateSpaRequest();
+         MasterPageObj.webExecute();
+         if ( ( GxWebError == 0 ) && httpContext.isAjaxRequest( ) )
+         {
+            httpContext.enableOutput();
+            if ( ! httpContext.isAjaxRequest( ) )
+            {
+               httpContext.GX_webresponse.addHeader("Cache-Control", "no-store");
+            }
+            if ( ! httpContext.willRedirect( ) )
+            {
+               addString( httpContext.getJSONResponse( )) ;
+            }
+            else
+            {
+               if ( httpContext.isAjaxRequest( ) )
+               {
+                  httpContext.disableOutput();
+               }
+               renderHtmlHeaders( ) ;
+               httpContext.redirect( httpContext.wjLoc );
+               httpContext.dispatchAjaxCommands();
+            }
+         }
+      }
+      if ( isAjaxCallMode( ) )
+      {
+         cleanup();
+      }
+   }
+
+   public byte executeStartEvent( )
+   {
+      pa0W2( ) ;
+      gxajaxcallmode = (byte)((isAjaxCallMode( ) ? 1 : 0)) ;
+      if ( ( gxajaxcallmode == 0 ) && ( GxWebError == 0 ) )
+      {
+         start0W2( ) ;
+      }
+      return gxajaxcallmode ;
+   }
+
+   public void renderHtmlHeaders( )
+   {
+      com.forumna.GxWebStd.gx_html_headers( httpContext, 0, "", "", Form.getMeta(), Form.getMetaequiv(), true);
+   }
+
+   public void renderHtmlOpenForm( )
+   {
+      if ( httpContext.isSpaRequest( ) )
+      {
+         httpContext.enableOutput();
+      }
+      httpContext.writeText( "<title>") ;
+      httpContext.writeValue( Form.getCaption()) ;
+      httpContext.writeTextNL( "</title>") ;
+      if ( httpContext.isSpaRequest( ) )
+      {
+         httpContext.disableOutput();
+      }
+      if ( GXutil.len( sDynURL) > 0 )
+      {
+         httpContext.writeText( "<BASE href=\""+sDynURL+"\" />") ;
+      }
+      define_styles( ) ;
+      if ( nGXWrapped != 1 )
+      {
+         MasterPageObj.master_styles();
+      }
+      httpContext.CloseStyles();
+      if ( ( ( httpContext.getBrowserType( ) == 1 ) || ( httpContext.getBrowserType( ) == 5 ) ) && ( GXutil.strcmp(httpContext.getBrowserVersion( ), "7.0") == 0 ) )
+      {
+         httpContext.AddJavascriptSource("json2.js", "?"+httpContext.getBuildNumber( 1121560), false, true);
+      }
+      httpContext.AddJavascriptSource("jquery.js", "?"+httpContext.getBuildNumber( 1121560), false, true);
+      httpContext.AddJavascriptSource("gxgral.js", "?"+httpContext.getBuildNumber( 1121560), false, true);
+      httpContext.AddJavascriptSource("gxcfg.js", "?"+httpContext.getCacheInvalidationToken( ), false, true);
+      if ( httpContext.isSpaRequest( ) )
+      {
+         httpContext.enableOutput();
+      }
+      httpContext.AddJavascriptSource("UserControls/UCCaptchaRender.js", "", false, true);
+      httpContext.AddJavascriptSource("DVelop/Shared/WorkWithPlusCommon.js", "", false, true);
+      httpContext.AddJavascriptSource("DVelop/Mask/jquery.mask.js", "", false, true);
+      httpContext.AddJavascriptSource("DVelop/WorkWithPlusUtilities/BootstrapSelect.js", "", false, true);
+      httpContext.AddJavascriptSource("DVelop/WorkWithPlusUtilities/WorkWithPlusUtilitiesRender.js", "", false, true);
+      httpContext.writeText( Form.getHeaderrawhtml()) ;
+      httpContext.closeHtmlHeader();
+      if ( httpContext.isSpaRequest( ) )
+      {
+         httpContext.disableOutput();
+      }
+      FormProcess = " data-HasEnter=\"true\" data-Skiponenter=\"false\"" ;
+      httpContext.writeText( "<body ") ;
+      if ( GXutil.strcmp(httpContext.getLanguageProperty( "rtl"), "true") == 0 )
+      {
+         httpContext.writeText( " dir=\"rtl\" ") ;
+      }
+      bodyStyle = "" + "background-color:" + WebUtils.getHTMLColor( Form.getIBackground()) + ";color:" + WebUtils.getHTMLColor( Form.getTextcolor()) + ";" ;
+      if ( nGXWrapped == 0 )
+      {
+         bodyStyle += "-moz-opacity:0;opacity:0;" ;
+      }
+      if ( ! ( (GXutil.strcmp("", Form.getBackground())==0) ) )
+      {
+         bodyStyle += " background-image:url(" + httpContext.convertURL( Form.getBackground()) + ")" ;
+      }
+      httpContext.writeText( " "+"class=\"form-horizontal FormBackgroundImage\""+" "+ "style='"+bodyStyle+"'") ;
+      httpContext.writeText( FormProcess+">") ;
+      httpContext.skipLines( 1 );
+      httpContext.writeTextNL( "<form id=\"MAINFORM\" autocomplete=\"off\" name=\"MAINFORM\" method=\"post\" tabindex=-1  class=\"form-horizontal FormBackgroundImage\" data-gx-class=\"form-horizontal FormBackgroundImage\" novalidate action=\""+formatLink("com.forumna.login", new String[] {}, new String[] {}) +"\">") ;
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "_EventName", "");
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "_EventGridId", "");
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "_EventRowId", "");
+      httpContext.writeText( "<div style=\"height:0;overflow:hidden\"><input type=\"submit\" title=\"submit\"  disabled></div>") ;
+      httpContext.ajax_rsp_assign_prop("", false, "FORM", "Class", "form-horizontal FormBackgroundImage", true);
+      toggleJsOutput = httpContext.isJsOutputEnabled( ) ;
+      if ( httpContext.isSpaRequest( ) )
+      {
+         httpContext.disableJsOutput();
+      }
+   }
+
+   public void send_integrity_footer_hashes( )
+   {
+      GXKey = httpContext.decrypt64( httpContext.getCookie( "GX_SESSION_ID"), context.getServerKey( )) ;
+   }
+
+   public void sendCloseFormHiddens( )
+   {
+      /* Send hidden variables. */
+      /* Send saved values. */
+      send_integrity_footer_hashes( ) ;
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PROFESIONALUSUARIO", A84ProfesionalUsuario);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PROFESIONALPASSWORD", A85ProfesionalPassword);
+      com.forumna.GxWebStd.gx_boolean_hidden_field( httpContext, "PROFESIONALHABILITADO", A87ProfesionalHabilitado);
+      if ( httpContext.isAjaxRequest( ) )
+      {
+         httpContext.ajax_rsp_assign_sdt_attri("", false, "vSDTSESSION", AV13SDTsession);
+      }
+      else
+      {
+         httpContext.ajax_rsp_assign_hidden_sdt("vSDTSESSION", AV13SDTsession);
+      }
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PROFESIONALID", GXutil.ltrim( localUtil.ntoc( A80ProfesionalId, (byte)(10), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PROFESIONALAPELLIDO", A81ProfesionalApellido);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PROFESIONALNOMBRE", A88ProfesionalNombre);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PROFESIONALMATRICULA", A82ProfesionalMatricula);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PROFESIONALCUIT", GXutil.ltrim( localUtil.ntoc( A83ProfesionalCUIT, (byte)(11), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "USU_MATRICULA", A95usu_matricula);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "vPROFEMATRICULA", AV19ProfeMatricula);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "AGENTEUSUARIO", A107AgenteUsuario);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "AGENTEPASSWORD", A108AgentePassword);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "AGENTEPROFESIONALID", GXutil.ltrim( localUtil.ntoc( A101AgenteProfesionalId, (byte)(10), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "AGENTEROLID", GXutil.ltrim( localUtil.ntoc( A102AgenteRolId, (byte)(10), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "AGENTEESTADO", GXutil.ltrim( localUtil.ntoc( A111AgenteEstado, (byte)(1), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "ROLID", GXutil.ltrim( localUtil.ntoc( A103RolId, (byte)(10), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "ROLNOMBRE", A104RolNombre);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "AGENTEID", GXutil.ltrim( localUtil.ntoc( A98AgenteId, (byte)(10), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "AGENTEAPELLIDO", A99AgenteApellido);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "AGENTENOMBRE", A100AgenteNombre);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "AGENTECUIL", GXutil.ltrim( localUtil.ntoc( A109AgenteCUIL, (byte)(11), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PERSONAUSUARIO", A114PersonaUsuario);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PERSONAPASSWORD", A116PersonaPassword);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PERSONAESTADO", GXutil.ltrim( localUtil.ntoc( A118PersonaEstado, (byte)(1), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_boolean_hidden_field( httpContext, "PERSONAHABILITADA", A119PersonaHabilitada);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PERSONAID", GXutil.ltrim( localUtil.ntoc( A112PersonaId, (byte)(10), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PERSONAAPELLIDO", A113PersonaApellido);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PERSONANOMBRE", A115PersonaNombre);
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "PERSONADOCCUIL", GXutil.ltrim( localUtil.ntoc( A121PersonaDocCuil, (byte)(11), (byte)(0), ",", "")));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "WWPUTILITIES_Enablefixobjectfitcover", GXutil.booltostr( Wwputilities_Enablefixobjectfitcover));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "WWPUTILITIES_Enableconvertcombotobootstrapselect", GXutil.booltostr( Wwputilities_Enableconvertcombotobootstrapselect));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "WWPUTILITIES_Allowcolumnresizing", GXutil.booltostr( Wwputilities_Allowcolumnresizing));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "WWPUTILITIES_Allowcolumnreordering", GXutil.booltostr( Wwputilities_Allowcolumnreordering));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "WWPUTILITIES_Allowcolumnsrestore", GXutil.booltostr( Wwputilities_Allowcolumnsrestore));
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "WWPUTILITIES_Comboloadtype", GXutil.rtrim( Wwputilities_Comboloadtype));
+   }
+
+   public void renderHtmlCloseForm( )
+   {
+      sendCloseFormHiddens( ) ;
+      com.forumna.GxWebStd.gx_hidden_field( httpContext, "GX_FocusControl", GX_FocusControl);
+      httpContext.SendAjaxEncryptionKey();
+      sendSecurityToken(sPrefix);
+      httpContext.SendComponentObjects();
+      httpContext.SendServerCommands();
+      httpContext.SendState();
+      if ( httpContext.isSpaRequest( ) )
+      {
+         httpContext.disableOutput();
+      }
+      httpContext.writeTextNL( "</form>") ;
+      if ( httpContext.isSpaRequest( ) )
+      {
+         httpContext.enableOutput();
+      }
+      include_jscripts( ) ;
+   }
+
+   public void renderHtmlContent( )
+   {
+      gxajaxcallmode = (byte)((isAjaxCallMode( ) ? 1 : 0)) ;
+      if ( ( gxajaxcallmode == 0 ) && ( GxWebError == 0 ) )
+      {
+         httpContext.writeText( "<div") ;
+         com.forumna.GxWebStd.classAttribute( httpContext, "gx-ct-body"+" "+((GXutil.strcmp("", Form.getThemeClass())==0) ? "form-horizontal FormBackgroundImage" : Form.getThemeClass())+"-fx");
+         httpContext.writeText( ">") ;
+         we0W2( ) ;
+         httpContext.writeText( "</div>") ;
+      }
+   }
+
+   public void dispatchEvents( )
+   {
+      evt0W2( ) ;
+   }
+
+   public boolean hasEnterEvent( )
+   {
+      return true ;
+   }
+
+   public com.genexus.webpanels.GXWebForm getForm( )
+   {
+      return Form ;
+   }
+
+   public String getSelfLink( )
+   {
+      return formatLink("com.forumna.login", new String[] {}, new String[] {})  ;
+   }
+
+   public String getPgmname( )
+   {
+      return "login" ;
+   }
+
+   public String getPgmdesc( )
+   {
+      return "Login Forum NA" ;
+   }
+
+   public void wb0W0( )
+   {
+      if ( httpContext.isAjaxRequest( ) )
+      {
+         httpContext.disableOutput();
+      }
+      if ( ! wbLoad )
+      {
+         if ( nGXWrapped == 1 )
+         {
+            renderHtmlHeaders( ) ;
+            renderHtmlOpenForm( ) ;
+         }
+         com.forumna.GxWebStd.gx_msg_list( httpContext, "", httpContext.GX_msglist.getDisplaymode(), "", "", "", "false");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "Section", "start", "top", " "+"data-gx-base-lib=\"bootstrapv3\""+" "+"data-abstract-form"+" ", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, divLayoutmaintable_Internalname, 1, 0, "px", 0, "px", divLayoutmaintable_Class, "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, divTablemain_Internalname, 1, 0, "px", 0, "px", "Table", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12 CellMarginLoginImageLeft", "Center", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, divTablelogincontent_Internalname, 1, 0, "px", 0, "px", "Table", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12 CellPaddingLeft30", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, divTablelogin_Internalname, 1, 0, "px", 0, "px", "TableLoginTransparency", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12", "Center", "top", "", "", "div");
+         /* Static images/pictures */
+         ClassString = "Image" + " " + ((GXutil.strcmp(imgLogologin_gximage, "")==0) ? "GX_Image_EscudoSmall_Class" : "GX_Image_"+imgLogologin_gximage+"_Class") ;
+         StyleString = "" ;
+         sImgUrl = context.getHttpContext().getImagePath( "fe3d8542-dbf6-49b6-a35f-fa5e8ea70083", "", context.getHttpContext().getTheme( )) ;
+         com.forumna.GxWebStd.gx_bitmap( httpContext, imgLogologin_Internalname, sImgUrl, "", "", "", context.getHttpContext().getTheme( ), 1, 1, "", "", 0, 0, 0, "px", 0, "px", 0, 0, 0, "", "", StyleString, ClassString, "", "", "", "", " "+"data-gx-image"+" ", "", "", 1, false, false, context.getHttpContext().getImageSrcSet( sImgUrl), "HLP_login.htm");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "Center", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12 AttributeTitleWWP", "Center", "top", "", "", "div");
+         /* Text block */
+         com.forumna.GxWebStd.gx_label_ctrl( httpContext, lblTxt1_Internalname, "Forum - Notificaciones Automáticas", "", "", lblTxt1_Jsonclick, "'"+""+"'"+",false,"+"'"+""+"'", "font-size:"+GXutil.str( lblTxt1_Fontsize, 3, 0)+"pt;"+((lblTxt1_Fontbold==1) ? "font-weight:bold;" : "font-weight:normal;")+"color:"+WebUtils.getHTMLColor( lblTxt1_Forecolor)+";", "TextBlock", 0, "", 1, 1, 0, (short)(0), "HLP_login.htm");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "Center", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12 CellMarginTop", "Center", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, divUnnamedtable1_Internalname, 1, 0, "px", 0, "px", "Table", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", " gx-attribute", "start", "top", "", "", "div");
+         /* Attribute/Variable Label */
+         com.forumna.GxWebStd.gx_label_element( httpContext, cmbavTipologin.getInternalname(), "tipologin", "col-sm-3 AttributeLoginImageLeftLabel", 0, true, "");
+         TempTags = "  onfocus=\"gx.evt.onfocus(this, 25,'',false,'',0)\"" ;
+         /* ComboBox */
+         com.forumna.GxWebStd.gx_combobox_ctrl1( httpContext, cmbavTipologin, cmbavTipologin.getInternalname(), GXutil.rtrim( AV17tipologin), 1, cmbavTipologin.getJsonclick(), 0, "'"+""+"'"+",false,"+"'"+""+"'", "svchar", "", 1, cmbavTipologin.getEnabled(), 0, (short)(0), 0, "em", 0, "", "", "AttributeLoginImageLeft", "", "", TempTags+" onchange=\""+""+";gx.evt.onchange(this, event)\" "+" onblur=\""+""+";gx.evt.onblur(this,25);\"", "", true, (byte)(0), "HLP_login.htm");
+         cmbavTipologin.setValue( GXutil.rtrim( AV17tipologin) );
+         httpContext.ajax_rsp_assign_prop("", false, cmbavTipologin.getInternalname(), "Values", cmbavTipologin.ToJavascriptSource(), true);
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12 DataContentCellLogin CellPaddingLogin CellLoginUserName", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", " gx-attribute", "start", "top", "", "", "div");
+         /* Attribute/Variable Label */
+         com.forumna.GxWebStd.gx_label_element( httpContext, edtavSecusername_Internalname, "Sec User Name", "col-sm-3 AttributeLoginImageLeftLabel", 0, true, "");
+         /* Single line edit */
+         TempTags = "  onfocus=\"gx.evt.onfocus(this, 29,'',false,'',0)\"" ;
+         com.forumna.GxWebStd.gx_single_line_edit( httpContext, edtavSecusername_Internalname, AV7SecUserName, GXutil.rtrim( localUtil.format( AV7SecUserName, "")), TempTags+" onchange=\""+""+";gx.evt.onchange(this, event)\" "+" onblur=\""+""+";gx.evt.onblur(this,29);\"", "'"+""+"'"+",false,"+"'"+""+"'", "", "", "", "Usuario", edtavSecusername_Jsonclick, 0, "AttributeLoginImageLeft", "", "", "", "", 1, edtavSecusername_Enabled, 0, "text", "", 80, "chr", 1, "row", 100, (byte)(0), (short)(0), 0, (byte)(0), (byte)(-1), (byte)(-1), true, "", "start", true, "", "HLP_login.htm");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12 DataContentCellLogin CellPaddingLogin CellLoginPassword", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", " gx-attribute", "start", "top", "", "", "div");
+         /* Attribute/Variable Label */
+         com.forumna.GxWebStd.gx_label_element( httpContext, edtavSecuserpassword_Internalname, "Sec User Password", "col-sm-3 AttributeLoginImageLeftLabel", 0, true, "");
+         /* Single line edit */
+         TempTags = "  onfocus=\"gx.evt.onfocus(this, 33,'',false,'',0)\"" ;
+         com.forumna.GxWebStd.gx_single_line_edit( httpContext, edtavSecuserpassword_Internalname, AV8SecUserPassword, GXutil.rtrim( localUtil.format( AV8SecUserPassword, "")), TempTags+" onchange=\""+""+";gx.evt.onchange(this, event)\" "+" onblur=\""+""+";gx.evt.onblur(this,33);\"", "'"+""+"'"+",false,"+"'"+""+"'", "", "", "", "Contraseña", edtavSecuserpassword_Jsonclick, 0, "AttributeLoginImageLeft", "", "", "", "", 1, edtavSecuserpassword_Enabled, 0, "text", "", 80, "chr", 1, "row", 100, (byte)(-1), (short)(0), 0, (byte)(0), (byte)(0), (byte)(-1), true, "", "start", true, "", "HLP_login.htm");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12 DataContentCellLogin CellPaddingLogin", "start", "top", "", "", "div");
+         /* Text block */
+         com.forumna.GxWebStd.gx_label_ctrl( httpContext, lblForgotpassword_Internalname, "Debe ingresar Usuario y Contraseña de Forum.", "", "", lblForgotpassword_Jsonclick, "'"+""+"'"+",false,"+"'"+""+"'", "", "TextBlock", 0, "", 1, 1, 0, (short)(1), "HLP_login.htm");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12 CellMarginTop10", "start", "top", "", "", "div");
+         /* User Defined Control */
+         ucUccaptcha.render(context, "uccaptcha", Uccaptcha_Internalname, "UCCAPTCHAContainer");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12 DataContentCellLogin CellPaddingLogin", "start", "top", "", "", "div");
+         TempTags = "  onfocus=\"gx.evt.onfocus(this, 42,'',false,'',0)\"" ;
+         ClassString = "ButtonMaterial ButtonLogin" ;
+         StyleString = "" ;
+         com.forumna.GxWebStd.gx_button_ctrl( httpContext, bttBtnenter_Internalname, "", "Iniciar sesión", bttBtnenter_Jsonclick, 5, "Confirmar", "", StyleString, ClassString, 1, 1, "standard", "'"+""+"'"+",false,"+"'"+"EENTER."+"'", TempTags, "", httpContext.getButtonType( ), "HLP_login.htm");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, divCelvarcaptcha_Internalname, 1, 0, "px", 0, "px", "col-xs-12 hidden-xs hidden-sm hidden-md hidden-lg", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "form-group gx-form-group", "start", "top", ""+" data-gx-for=\""+edtavVarcaptcha_Internalname+"\"", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-sm-9 gx-attribute", "start", "top", "", "", "div");
+         /* Multiple line edit */
+         TempTags = "  onfocus=\"gx.evt.onfocus(this, 47,'',false,'',0)\"" ;
+         ClassString = "AttributeRealWidth" ;
+         StyleString = "" ;
+         ClassString = "AttributeRealWidth" ;
+         StyleString = "" ;
+         com.forumna.GxWebStd.gx_html_textarea( httpContext, edtavVarcaptcha_Internalname, AV30varcaptcha, "", TempTags+" onchange=\""+""+";gx.evt.onchange(this, event)\" "+" onblur=\""+""+";gx.evt.onblur(this,47);\"", (short)(0), 1, edtavVarcaptcha_Enabled, 0, 80, "chr", 7, "row", (byte)(0), StyleString, ClassString, "", "", "500", -1, 0, "", "", (byte)(-1), true, "", "'"+""+"'"+",false,"+"'"+""+"'", 0, "", "HLP_login.htm");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "Center", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12 CellMarginTop10", "Center", "top", "", "", "div");
+         /* Text block */
+         com.forumna.GxWebStd.gx_label_ctrl( httpContext, lblVersion_Internalname, "Versión 1.0.0", "", "", lblVersion_Jsonclick, "'"+""+"'"+",false,"+"'"+""+"'", "", "TextBlock", 0, "", 1, 1, 0, (short)(0), "HLP_login.htm");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "Center", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "Center", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "row", "start", "top", "", "", "div");
+         /* Div Control */
+         com.forumna.GxWebStd.gx_div_start( httpContext, "", 1, 0, "px", 0, "px", "col-xs-12", "start", "top", "", "", "div");
+         /* User Defined Control */
+         ucWwputilities.setProperty("EnableFixObjectFitCover", Wwputilities_Enablefixobjectfitcover);
+         ucWwputilities.setProperty("EnableConvertComboToBootstrapSelect", Wwputilities_Enableconvertcombotobootstrapselect);
+         ucWwputilities.setProperty("AllowColumnResizing", Wwputilities_Allowcolumnresizing);
+         ucWwputilities.setProperty("AllowColumnReordering", Wwputilities_Allowcolumnreordering);
+         ucWwputilities.setProperty("AllowColumnsRestore", Wwputilities_Allowcolumnsrestore);
+         ucWwputilities.setProperty("ComboLoadType", Wwputilities_Comboloadtype);
+         ucWwputilities.render(context, "wwp.workwithplusutilities_fal", Wwputilities_Internalname, "WWPUTILITIESContainer");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+         com.forumna.GxWebStd.gx_div_end( httpContext, "start", "top", "div");
+      }
+      wbLoad = true ;
+   }
+
+   public void start0W2( )
+   {
+      wbLoad = false ;
+      wbEnd = 0 ;
+      wbStart = 0 ;
+      if ( ! httpContext.isSpaRequest( ) )
+      {
+         if ( httpContext.exposeMetadata( ) )
+         {
+            Form.getMeta().addItem("generator", "GeneXus Java 18_0_9-182098", (short)(0)) ;
+         }
+      }
+      Form.getMeta().addItem("description", "Login Forum NA", (short)(0)) ;
+      httpContext.wjLoc = "" ;
+      httpContext.nUserReturn = (byte)(0) ;
+      httpContext.wbHandled = (byte)(0) ;
+      if ( GXutil.strcmp(httpContext.getRequestMethod( ), "POST") == 0 )
+      {
+      }
+      wbErr = false ;
+      strup0W0( ) ;
+   }
+
+   public void ws0W2( )
+   {
+      start0W2( ) ;
+      evt0W2( ) ;
+   }
+
+   public void evt0W2( )
+   {
+      if ( GXutil.strcmp(httpContext.getRequestMethod( ), "POST") == 0 )
+      {
+         if ( ! httpContext.willRedirect( ) && ( httpContext.nUserReturn != 1 ) && ! wbErr )
+         {
+            /* Read Web Panel buttons. */
+            sEvt = httpContext.cgiGet( "_EventName") ;
+            EvtGridId = httpContext.cgiGet( "_EventGridId") ;
+            EvtRowId = httpContext.cgiGet( "_EventRowId") ;
+            if ( GXutil.len( sEvt) > 0 )
+            {
+               sEvtType = GXutil.left( sEvt, 1) ;
+               sEvt = GXutil.right( sEvt, GXutil.len( sEvt)-1) ;
+               if ( GXutil.strcmp(sEvtType, "M") != 0 )
+               {
+                  if ( GXutil.strcmp(sEvtType, "E") == 0 )
+                  {
+                     sEvtType = GXutil.right( sEvt, 1) ;
+                     if ( GXutil.strcmp(sEvtType, ".") == 0 )
+                     {
+                        sEvt = GXutil.left( sEvt, GXutil.len( sEvt)-1) ;
+                        if ( GXutil.strcmp(sEvt, "RFR") == 0 )
+                        {
+                           httpContext.wbHandled = (byte)(1) ;
+                           dynload_actions( ) ;
+                        }
+                        else if ( GXutil.strcmp(sEvt, "START") == 0 )
+                        {
+                           httpContext.wbHandled = (byte)(1) ;
+                           dynload_actions( ) ;
+                           /* Execute user event: Start */
+                           e110W2 ();
+                        }
+                        else if ( GXutil.strcmp(sEvt, "ENTER") == 0 )
+                        {
+                           httpContext.wbHandled = (byte)(1) ;
+                           if ( ! wbErr )
+                           {
+                              Rfr0gs = false ;
+                              if ( ! Rfr0gs )
+                              {
+                                 /* Execute user event: Enter */
+                                 e120W2 ();
+                              }
+                              dynload_actions( ) ;
+                           }
+                        }
+                        else if ( GXutil.strcmp(sEvt, "LOAD") == 0 )
+                        {
+                           httpContext.wbHandled = (byte)(1) ;
+                           dynload_actions( ) ;
+                           /* Execute user event: Load */
+                           e130W2 ();
+                           /* No code required for Cancel button. It is implemented as the Reset button. */
+                        }
+                        else if ( GXutil.strcmp(sEvt, "LSCR") == 0 )
+                        {
+                           httpContext.wbHandled = (byte)(1) ;
+                           dynload_actions( ) ;
+                           dynload_actions( ) ;
+                        }
+                     }
+                     else
+                     {
+                     }
+                  }
+                  httpContext.wbHandled = (byte)(1) ;
+               }
+            }
+         }
+      }
+   }
+
+   public void we0W2( )
+   {
+      if ( ! com.forumna.GxWebStd.gx_redirect( httpContext) )
+      {
+         Rfr0gs = true ;
+         refresh( ) ;
+         if ( ! com.forumna.GxWebStd.gx_redirect( httpContext) )
+         {
+            if ( nGXWrapped == 1 )
+            {
+               renderHtmlCloseForm( ) ;
+            }
+         }
+      }
+   }
+
+   public void pa0W2( )
+   {
+      if ( nDonePA == 0 )
+      {
+         if ( (GXutil.strcmp("", httpContext.getCookie( "GX_SESSION_ID"))==0) )
+         {
+            gxcookieaux = httpContext.setCookie( "GX_SESSION_ID", httpContext.encrypt64( com.genexus.util.Encryption.getNewKey( ), context.getServerKey( )), "", GXutil.nullDate(), "", (short)(httpContext.getHttpSecure( ))) ;
+         }
+         GXKey = httpContext.decrypt64( httpContext.getCookie( "GX_SESSION_ID"), context.getServerKey( )) ;
+         toggleJsOutput = httpContext.isJsOutputEnabled( ) ;
+         if ( httpContext.isSpaRequest( ) )
+         {
+            httpContext.disableJsOutput();
+         }
+         init_web_controls( ) ;
+         if ( toggleJsOutput )
+         {
+            if ( httpContext.isSpaRequest( ) )
+            {
+               httpContext.enableJsOutput();
+            }
+         }
+         if ( ! httpContext.isAjaxRequest( ) )
+         {
+            GX_FocusControl = cmbavTipologin.getInternalname() ;
+            httpContext.ajax_rsp_assign_attri("", false, "GX_FocusControl", GX_FocusControl);
+         }
+         nDonePA = (byte)(1) ;
+      }
+   }
+
+   public void dynload_actions( )
+   {
+      /* End function dynload_actions */
+   }
+
+   public void send_integrity_hashes( )
+   {
+   }
+
+   public void clear_multi_value_controls( )
+   {
+      if ( httpContext.isAjaxRequest( ) )
+      {
+         dynload_actions( ) ;
+         before_start_formulas( ) ;
+      }
+   }
+
+   public void fix_multi_value_controls( )
+   {
+      if ( cmbavTipologin.getItemCount() > 0 )
+      {
+         AV17tipologin = cmbavTipologin.getValidValue(AV17tipologin) ;
+         httpContext.ajax_rsp_assign_attri("", false, "AV17tipologin", AV17tipologin);
+      }
+      if ( httpContext.isAjaxRequest( ) )
+      {
+         cmbavTipologin.setValue( GXutil.rtrim( AV17tipologin) );
+         httpContext.ajax_rsp_assign_prop("", false, cmbavTipologin.getInternalname(), "Values", cmbavTipologin.ToJavascriptSource(), true);
+      }
+   }
+
+   public void refresh( )
+   {
+      send_integrity_hashes( ) ;
+      rf0W2( ) ;
+      if ( isFullAjaxMode( ) )
+      {
+         send_integrity_footer_hashes( ) ;
+      }
+      /* End function Refresh */
+   }
+
+   public void initialize_formulas( )
+   {
+      /* GeneXus formulas. */
+   }
+
+   public void rf0W2( )
+   {
+      initialize_formulas( ) ;
+      clear_multi_value_controls( ) ;
+      gxdyncontrolsrefreshing = true ;
+      fix_multi_value_controls( ) ;
+      gxdyncontrolsrefreshing = false ;
+      if ( ! httpContext.willRedirect( ) && ( httpContext.nUserReturn != 1 ) )
+      {
+         /* Execute user event: Load */
+         e130W2 ();
+         wb0W0( ) ;
+      }
+   }
+
+   public void send_integrity_lvl_hashes0W2( )
+   {
+   }
+
+   public void before_start_formulas( )
+   {
+      fix_multi_value_controls( ) ;
+   }
+
+   public void strup0W0( )
+   {
+      /* Before Start, stand alone formulas. */
+      before_start_formulas( ) ;
+      /* Execute Start event if defined. */
+      httpContext.wbGlbDoneStart = (byte)(0) ;
+      /* Execute user event: Start */
+      e110W2 ();
+      httpContext.wbGlbDoneStart = (byte)(1) ;
+      /* After Start, stand alone formulas. */
+      if ( GXutil.strcmp(httpContext.getRequestMethod( ), "POST") == 0 )
+      {
+         /* Read saved SDTs. */
+         /* Read saved values. */
+         Wwputilities_Enablefixobjectfitcover = GXutil.strtobool( httpContext.cgiGet( "WWPUTILITIES_Enablefixobjectfitcover")) ;
+         Wwputilities_Enableconvertcombotobootstrapselect = GXutil.strtobool( httpContext.cgiGet( "WWPUTILITIES_Enableconvertcombotobootstrapselect")) ;
+         Wwputilities_Allowcolumnresizing = GXutil.strtobool( httpContext.cgiGet( "WWPUTILITIES_Allowcolumnresizing")) ;
+         Wwputilities_Allowcolumnreordering = GXutil.strtobool( httpContext.cgiGet( "WWPUTILITIES_Allowcolumnreordering")) ;
+         Wwputilities_Allowcolumnsrestore = GXutil.strtobool( httpContext.cgiGet( "WWPUTILITIES_Allowcolumnsrestore")) ;
+         Wwputilities_Comboloadtype = httpContext.cgiGet( "WWPUTILITIES_Comboloadtype") ;
+         /* Read variables values. */
+         cmbavTipologin.setValue( httpContext.cgiGet( cmbavTipologin.getInternalname()) );
+         AV17tipologin = httpContext.cgiGet( cmbavTipologin.getInternalname()) ;
+         httpContext.ajax_rsp_assign_attri("", false, "AV17tipologin", AV17tipologin);
+         AV7SecUserName = httpContext.cgiGet( edtavSecusername_Internalname) ;
+         httpContext.ajax_rsp_assign_attri("", false, "AV7SecUserName", AV7SecUserName);
+         AV8SecUserPassword = httpContext.cgiGet( edtavSecuserpassword_Internalname) ;
+         httpContext.ajax_rsp_assign_attri("", false, "AV8SecUserPassword", AV8SecUserPassword);
+         AV30varcaptcha = httpContext.cgiGet( edtavVarcaptcha_Internalname) ;
+         httpContext.ajax_rsp_assign_attri("", false, "AV30varcaptcha", AV30varcaptcha);
+         /* Read subfile selected row values. */
+         /* Read hidden variables. */
+         GXKey = httpContext.decrypt64( httpContext.getCookie( "GX_SESSION_ID"), context.getServerKey( )) ;
+      }
+      else
+      {
+         dynload_actions( ) ;
+      }
+   }
+
+   protected void GXStart( )
+   {
+      /* Execute user event: Start */
+      e110W2 ();
+      if (returnInSub) return;
+   }
+
+   public void e110W2( )
+   {
+      /* Start Routine */
+      returnInSub = false ;
+      AV6WebSession.destroy();
+      AV13SDTsession = (com.forumna.SdtSDTSession)new com.forumna.SdtSDTSession(remoteHandle, context);
+      AV6WebSession.setValue("Session", AV13SDTsession.toJSonString(false, true));
+      divLayoutmaintable_Class = "MainContainerNoBackground" ;
+      httpContext.ajax_rsp_assign_prop("", false, divLayoutmaintable_Internalname, "Class", divLayoutmaintable_Class, true);
+      lblTxt1_Forecolor = GXutil.getColor( 242, 242, 242) ;
+      httpContext.ajax_rsp_assign_prop("", false, lblTxt1_Internalname, "Forecolor", GXutil.ltrimstr( DecimalUtil.doubleToDec(lblTxt1_Forecolor), 9, 0), true);
+      lblTxt1_Fontbold = (byte)(1) ;
+      httpContext.ajax_rsp_assign_prop("", false, lblTxt1_Internalname, "Fontbold", GXutil.str( lblTxt1_Fontbold, 1, 0), true);
+      lblTxt1_Fontsize = 14 ;
+      httpContext.ajax_rsp_assign_prop("", false, lblTxt1_Internalname, "Fontsize", GXutil.ltrimstr( DecimalUtil.doubleToDec(lblTxt1_Fontsize), 9, 0), true);
+      AV7SecUserName = "usuario467" ;
+      httpContext.ajax_rsp_assign_attri("", false, "AV7SecUserName", AV7SecUserName);
+      AV8SecUserPassword = "1234" ;
+      httpContext.ajax_rsp_assign_attri("", false, "AV8SecUserPassword", AV8SecUserPassword);
+   }
+
+   public void GXEnter( )
+   {
+      /* Execute user event: Enter */
+      e120W2 ();
+      if (returnInSub) return;
+   }
+
+   public void e120W2( )
+   {
+      /* Enter Routine */
+      returnInSub = false ;
+      AV25CaptchaValid = false ;
+      AV15CryptoHash.setAlgorithm( "SHA256" );
+      AV9SecUserPasswordEncrypted = AV15CryptoHash.compute(AV8SecUserPassword, "") ;
+      httpContext.ajax_rsp_assign_attri("", false, "AV9SecUserPasswordEncrypted", AV9SecUserPasswordEncrypted);
+      AV5LogInSuccessful = false ;
+      AV10Habilitado = "0" ;
+      AV12UsuPass = false ;
+      if ( GXutil.strcmp(GXutil.trim( AV17tipologin), "Profesional") == 0 )
+      {
+         /* Using cursor H000W2 */
+         pr_forum.execute(0, new Object[] {AV7SecUserName, AV9SecUserPasswordEncrypted});
+         while ( (pr_forum.getStatus(0) != 101) )
+         {
+            A85ProfesionalPassword = H000W2_A85ProfesionalPassword[0] ;
+            n85ProfesionalPassword = H000W2_n85ProfesionalPassword[0] ;
+            A84ProfesionalUsuario = H000W2_A84ProfesionalUsuario[0] ;
+            n84ProfesionalUsuario = H000W2_n84ProfesionalUsuario[0] ;
+            A87ProfesionalHabilitado = H000W2_A87ProfesionalHabilitado[0] ;
+            n87ProfesionalHabilitado = H000W2_n87ProfesionalHabilitado[0] ;
+            A80ProfesionalId = H000W2_A80ProfesionalId[0] ;
+            A88ProfesionalNombre = H000W2_A88ProfesionalNombre[0] ;
+            n88ProfesionalNombre = H000W2_n88ProfesionalNombre[0] ;
+            A81ProfesionalApellido = H000W2_A81ProfesionalApellido[0] ;
+            n81ProfesionalApellido = H000W2_n81ProfesionalApellido[0] ;
+            A82ProfesionalMatricula = H000W2_A82ProfesionalMatricula[0] ;
+            n82ProfesionalMatricula = H000W2_n82ProfesionalMatricula[0] ;
+            A83ProfesionalCUIT = H000W2_A83ProfesionalCUIT[0] ;
+            n83ProfesionalCUIT = H000W2_n83ProfesionalCUIT[0] ;
+            AV12UsuPass = true ;
+            if ( A87ProfesionalHabilitado )
+            {
+               AV10Habilitado = "1" ;
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuariotipo( "Profesional" );
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuarioid( A80ProfesionalId );
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuarioayn( GXutil.trim( A81ProfesionalApellido)+", "+GXutil.trim( A88ProfesionalNombre) );
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuariousuario( GXutil.trim( A84ProfesionalUsuario) );
+               AV13SDTsession.setgxTv_SdtSDTSession_Matricula( GXutil.trim( A82ProfesionalMatricula) );
+               AV13SDTsession.setgxTv_SdtSDTSession_Cuit( A83ProfesionalCUIT );
+               AV19ProfeMatricula = GXutil.trim( A82ProfesionalMatricula) ;
+               httpContext.ajax_rsp_assign_attri("", false, "AV19ProfeMatricula", AV19ProfeMatricula);
+               AV5LogInSuccessful = true ;
+            }
+            /* Exit For each command. Update data (if necessary), close cursors & exit. */
+            if (true) break;
+            pr_forum.readNext(0);
+         }
+         pr_forum.close(0);
+         AV20MatriculaForumIurix = false ;
+         /* Using cursor H000W3 */
+         pr_default.execute(0, new Object[] {AV19ProfeMatricula});
+         while ( (pr_default.getStatus(0) != 101) )
+         {
+            A95usu_matricula = H000W3_A95usu_matricula[0] ;
+            n95usu_matricula = H000W3_n95usu_matricula[0] ;
+            AV20MatriculaForumIurix = true ;
+            /* Exit For each command. Update data (if necessary), close cursors & exit. */
+            if (true) break;
+            pr_default.readNext(0);
+         }
+         pr_default.close(0);
+         AV13SDTsession.setgxTv_SdtSDTSession_Matriculaforumiurix( AV20MatriculaForumIurix );
+         AV6WebSession.setValue("Session", AV13SDTsession.toJSonString(false, true));
+      }
+      else if ( GXutil.strcmp(GXutil.trim( AV17tipologin), "Agente") == 0 )
+      {
+         /* Using cursor H000W4 */
+         pr_forum.execute(1, new Object[] {AV7SecUserName, AV9SecUserPasswordEncrypted});
+         while ( (pr_forum.getStatus(1) != 101) )
+         {
+            A108AgentePassword = H000W4_A108AgentePassword[0] ;
+            n108AgentePassword = H000W4_n108AgentePassword[0] ;
+            A107AgenteUsuario = H000W4_A107AgenteUsuario[0] ;
+            n107AgenteUsuario = H000W4_n107AgenteUsuario[0] ;
+            A101AgenteProfesionalId = H000W4_A101AgenteProfesionalId[0] ;
+            n101AgenteProfesionalId = H000W4_n101AgenteProfesionalId[0] ;
+            A102AgenteRolId = H000W4_A102AgenteRolId[0] ;
+            n102AgenteRolId = H000W4_n102AgenteRolId[0] ;
+            A111AgenteEstado = H000W4_A111AgenteEstado[0] ;
+            n111AgenteEstado = H000W4_n111AgenteEstado[0] ;
+            A98AgenteId = H000W4_A98AgenteId[0] ;
+            A100AgenteNombre = H000W4_A100AgenteNombre[0] ;
+            n100AgenteNombre = H000W4_n100AgenteNombre[0] ;
+            A99AgenteApellido = H000W4_A99AgenteApellido[0] ;
+            n99AgenteApellido = H000W4_n99AgenteApellido[0] ;
+            A109AgenteCUIL = H000W4_A109AgenteCUIL[0] ;
+            n109AgenteCUIL = H000W4_n109AgenteCUIL[0] ;
+            AV21ProfesionalId = A101AgenteProfesionalId ;
+            httpContext.ajax_rsp_assign_attri("", false, "AV21ProfesionalId", GXutil.ltrimstr( DecimalUtil.doubleToDec(AV21ProfesionalId), 10, 0));
+            AV22RolId = A102AgenteRolId ;
+            httpContext.ajax_rsp_assign_attri("", false, "AV22RolId", GXutil.ltrimstr( DecimalUtil.doubleToDec(AV22RolId), 10, 0));
+            AV12UsuPass = true ;
+            if ( A111AgenteEstado == 1 )
+            {
+               AV10Habilitado = "1" ;
+               /* Using cursor H000W5 */
+               pr_forum.execute(2, new Object[] {Long.valueOf(AV21ProfesionalId)});
+               while ( (pr_forum.getStatus(2) != 101) )
+               {
+                  A80ProfesionalId = H000W5_A80ProfesionalId[0] ;
+                  A81ProfesionalApellido = H000W5_A81ProfesionalApellido[0] ;
+                  n81ProfesionalApellido = H000W5_n81ProfesionalApellido[0] ;
+                  AV23Institucion = GXutil.trim( A81ProfesionalApellido) ;
+                  /* Exit For each command. Update data (if necessary), close cursors & exit. */
+                  if (true) break;
+                  /* Exiting from a For First loop. */
+                  if (true) break;
+               }
+               pr_forum.close(2);
+               /* Using cursor H000W6 */
+               pr_forum.execute(3, new Object[] {Long.valueOf(AV22RolId)});
+               while ( (pr_forum.getStatus(3) != 101) )
+               {
+                  A103RolId = H000W6_A103RolId[0] ;
+                  A104RolNombre = H000W6_A104RolNombre[0] ;
+                  n104RolNombre = H000W6_n104RolNombre[0] ;
+                  AV24RolNombre = A104RolNombre ;
+                  /* Exit For each command. Update data (if necessary), close cursors & exit. */
+                  if (true) break;
+                  /* Exiting from a For First loop. */
+                  if (true) break;
+               }
+               pr_forum.close(3);
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuariotipo( "Agente" );
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuarioid( A98AgenteId );
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuarioayn( GXutil.trim( A99AgenteApellido)+", "+GXutil.trim( A100AgenteNombre) );
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuariousuario( GXutil.trim( A107AgenteUsuario) );
+               AV13SDTsession.setgxTv_SdtSDTSession_Institucion( GXutil.trim( AV23Institucion) );
+               AV13SDTsession.setgxTv_SdtSDTSession_Rol( AV24RolNombre );
+               AV13SDTsession.setgxTv_SdtSDTSession_Cuit( A109AgenteCUIL );
+               AV5LogInSuccessful = true ;
+               httpContext.GX_msglist.addItem(GXutil.booltostr( AV5LogInSuccessful));
+            }
+            /* Exit For each command. Update data (if necessary), close cursors & exit. */
+            if (true) break;
+            pr_forum.readNext(1);
+         }
+         pr_forum.close(1);
+         AV6WebSession.setValue("Session", AV13SDTsession.toJSonString(false, true));
+      }
+      else if ( GXutil.strcmp(GXutil.trim( AV17tipologin), "Persona") == 0 )
+      {
+         /* Using cursor H000W7 */
+         pr_forum.execute(4, new Object[] {AV7SecUserName, AV9SecUserPasswordEncrypted});
+         while ( (pr_forum.getStatus(4) != 101) )
+         {
+            A116PersonaPassword = H000W7_A116PersonaPassword[0] ;
+            n116PersonaPassword = H000W7_n116PersonaPassword[0] ;
+            A114PersonaUsuario = H000W7_A114PersonaUsuario[0] ;
+            n114PersonaUsuario = H000W7_n114PersonaUsuario[0] ;
+            A119PersonaHabilitada = H000W7_A119PersonaHabilitada[0] ;
+            n119PersonaHabilitada = H000W7_n119PersonaHabilitada[0] ;
+            A118PersonaEstado = H000W7_A118PersonaEstado[0] ;
+            n118PersonaEstado = H000W7_n118PersonaEstado[0] ;
+            A112PersonaId = H000W7_A112PersonaId[0] ;
+            A115PersonaNombre = H000W7_A115PersonaNombre[0] ;
+            n115PersonaNombre = H000W7_n115PersonaNombre[0] ;
+            A113PersonaApellido = H000W7_A113PersonaApellido[0] ;
+            n113PersonaApellido = H000W7_n113PersonaApellido[0] ;
+            A121PersonaDocCuil = H000W7_A121PersonaDocCuil[0] ;
+            n121PersonaDocCuil = H000W7_n121PersonaDocCuil[0] ;
+            httpContext.GX_msglist.addItem(GXutil.booltostr( AV5LogInSuccessful)+"  persona");
+            AV12UsuPass = true ;
+            if ( ( A118PersonaEstado == 1 ) && ( A119PersonaHabilitada ) )
+            {
+               AV10Habilitado = "1" ;
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuariotipo( "Persona" );
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuarioid( A112PersonaId );
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuarioayn( GXutil.trim( A113PersonaApellido)+", "+GXutil.trim( A115PersonaNombre) );
+               AV13SDTsession.setgxTv_SdtSDTSession_Usuariousuario( GXutil.trim( A114PersonaUsuario) );
+               AV13SDTsession.setgxTv_SdtSDTSession_Cuit( A121PersonaDocCuil );
+               AV5LogInSuccessful = true ;
+            }
+            /* Exit For each command. Update data (if necessary), close cursors & exit. */
+            if (true) break;
+            pr_forum.readNext(4);
+         }
+         pr_forum.close(4);
+         AV6WebSession.setValue("Session", AV13SDTsession.toJSonString(false, true));
+      }
+      GXt_boolean1 = AV25CaptchaValid ;
+      GXv_boolean2[0] = GXt_boolean1 ;
+      new com.forumna.pvalidarcaptcha(remoteHandle, context).execute( AV30varcaptcha, GXv_boolean2) ;
+      login_impl.this.GXt_boolean1 = GXv_boolean2[0] ;
+      AV25CaptchaValid = GXt_boolean1 ;
+      if ( AV12UsuPass && ( GXutil.strcmp(AV10Habilitado, "1") == 0 ) && AV5LogInSuccessful && ( AV25CaptchaValid ) )
+      {
+         callWebObject(formatLink("com.forumna.home", new String[] {}, new String[] {}) );
+         httpContext.wjLocDisableFrm = (byte)(1) ;
+      }
+      else
+      {
+         if ( ! AV25CaptchaValid )
+         {
+            httpContext.GX_msglist.addItem("Por favor, complete el reCAPTCHA.");
+         }
+         if ( ! AV12UsuPass )
+         {
+            httpContext.GX_msglist.addItem("Usuario o Contraseña incorrecto.");
+            this.executeUsercontrolMethod("", false, "UCCAPTCHAContainer", "ResetCaptcha", "", new Object[] {});
+         }
+         else
+         {
+            if ( GXutil.strcmp(AV10Habilitado, "0") == 0 )
+            {
+               httpContext.GX_msglist.addItem("Usuario no Habilitado.");
+            }
+         }
+      }
+      /*  Sending Event outputs  */
+      httpContext.ajax_rsp_assign_sdt_attri("", false, "AV13SDTsession", AV13SDTsession);
+   }
+
+   protected void nextLoad( )
+   {
+   }
+
+   protected void e130W2( )
+   {
+      /* Load Routine */
+      returnInSub = false ;
+   }
+
+   @SuppressWarnings("unchecked")
+   public void setparameters( Object[] obj )
+   {
+   }
+
+   public String getresponse( String sGXDynURL )
+   {
+      initialize_properties( ) ;
+      BackMsgLst = httpContext.GX_msglist ;
+      httpContext.GX_msglist = LclMsgLst ;
+      sDynURL = sGXDynURL ;
+      nGotPars = 1 ;
+      nGXWrapped = 1 ;
+      httpContext.setWrapped(true);
+      pa0W2( ) ;
+      ws0W2( ) ;
+      we0W2( ) ;
+      if ( isAjaxCallMode( ) )
+      {
+         cleanup();
+      }
+      httpContext.setWrapped(false);
+      httpContext.GX_msglist = BackMsgLst ;
+      String response = "";
+      try
+      {
+         response = ((java.io.ByteArrayOutputStream) httpContext.getOutputStream()).toString("UTF8");
+      }
+      catch (java.io.UnsupportedEncodingException e)
+      {
+         Application.printWarning(e.getMessage(), e);
+      }
+      finally
+      {
+         httpContext.closeOutputStream();
+      }
+      return response;
+   }
+
+   public void responsestatic( String sGXDynURL )
+   {
+   }
+
+   public void define_styles( )
+   {
+      httpContext.AddStyleSheetFile("DVelop/Bootstrap/Shared/fontawesome_vlatest/css/all.min.css", "");
+      httpContext.AddStyleSheetFile("DVelop/Bootstrap/Shared/DVelopBootstrap.css", "");
+      httpContext.AddThemeStyleSheetFile("", context.getHttpContext().getTheme( )+".css", "?"+httpContext.getCacheInvalidationToken( ));
+      boolean outputEnabled = httpContext.isOutputEnabled( );
+      if ( httpContext.isSpaRequest( ) )
+      {
+         httpContext.enableOutput();
+      }
+      idxLst = 1 ;
+      while ( idxLst <= Form.getJscriptsrc().getCount() )
+      {
+         httpContext.AddJavascriptSource(GXutil.rtrim( Form.getJscriptsrc().item(idxLst)), "?2025181047231", true, true);
+         idxLst = (int)(idxLst+1) ;
+      }
+      if ( ! outputEnabled )
+      {
+         if ( httpContext.isSpaRequest( ) )
+         {
+            httpContext.disableOutput();
+         }
+      }
+      /* End function define_styles */
+   }
+
+   public void include_jscripts( )
+   {
+      httpContext.AddJavascriptSource("messages.spa.js", "?"+httpContext.getCacheInvalidationToken( ), false, true);
+      httpContext.AddJavascriptSource("login.js", "?2025181047231", false, true);
+      httpContext.AddJavascriptSource("UserControls/UCCaptchaRender.js", "", false, true);
+      httpContext.AddJavascriptSource("DVelop/Shared/WorkWithPlusCommon.js", "", false, true);
+      httpContext.AddJavascriptSource("DVelop/Mask/jquery.mask.js", "", false, true);
+      httpContext.AddJavascriptSource("DVelop/WorkWithPlusUtilities/BootstrapSelect.js", "", false, true);
+      httpContext.AddJavascriptSource("DVelop/WorkWithPlusUtilities/WorkWithPlusUtilitiesRender.js", "", false, true);
+      /* End function include_jscripts */
+   }
+
+   public void init_default_properties( )
+   {
+      imgLogologin_Internalname = "LOGOLOGIN" ;
+      lblTxt1_Internalname = "TXT1" ;
+      cmbavTipologin.setInternalname( "vTIPOLOGIN" );
+      edtavSecusername_Internalname = "vSECUSERNAME" ;
+      edtavSecuserpassword_Internalname = "vSECUSERPASSWORD" ;
+      lblForgotpassword_Internalname = "FORGOTPASSWORD" ;
+      Uccaptcha_Internalname = "UCCAPTCHA" ;
+      bttBtnenter_Internalname = "BTNENTER" ;
+      edtavVarcaptcha_Internalname = "vVARCAPTCHA" ;
+      divCelvarcaptcha_Internalname = "CELVARCAPTCHA" ;
+      divUnnamedtable1_Internalname = "UNNAMEDTABLE1" ;
+      lblVersion_Internalname = "VERSION" ;
+      divTablelogin_Internalname = "TABLELOGIN" ;
+      divTablelogincontent_Internalname = "TABLELOGINCONTENT" ;
+      Wwputilities_Internalname = "WWPUTILITIES" ;
+      divTablemain_Internalname = "TABLEMAIN" ;
+      divLayoutmaintable_Internalname = "LAYOUTMAINTABLE" ;
+      Form.setInternalname( "FORM" );
+   }
+
+   public void initialize_properties( )
+   {
+      httpContext.setAjaxOnSessionTimeout(ajaxOnSessionTimeout());
+      httpContext.setDefaultTheme("WorkWithPlusDS", true);
+      if ( httpContext.isSpaRequest( ) )
+      {
+         httpContext.disableJsOutput();
+      }
+      init_default_properties( ) ;
+      edtavVarcaptcha_Enabled = 1 ;
+      edtavSecuserpassword_Jsonclick = "" ;
+      edtavSecuserpassword_Enabled = 1 ;
+      edtavSecusername_Jsonclick = "" ;
+      edtavSecusername_Enabled = 1 ;
+      cmbavTipologin.setJsonclick( "" );
+      cmbavTipologin.setEnabled( 1 );
+      lblTxt1_Forecolor = (int)(0x000000) ;
+      lblTxt1_Fontbold = (byte)(0) ;
+      lblTxt1_Fontsize = (int)(DecimalUtil.decToDouble(DecimalUtil.stringToDec("12.0"))) ;
+      divLayoutmaintable_Class = "Table" ;
+      Wwputilities_Comboloadtype = "InfiniteScrolling" ;
+      Wwputilities_Allowcolumnsrestore = GXutil.toBoolean( -1) ;
+      Wwputilities_Allowcolumnreordering = GXutil.toBoolean( -1) ;
+      Wwputilities_Allowcolumnresizing = GXutil.toBoolean( -1) ;
+      Wwputilities_Enableconvertcombotobootstrapselect = GXutil.toBoolean( -1) ;
+      Wwputilities_Enablefixobjectfitcover = GXutil.toBoolean( -1) ;
+      Form.setHeaderrawhtml( "" );
+      Form.setBackground( "" );
+      Form.setTextcolor( 0 );
+      Form.setIBackground( (int)(0xFFFFFF) );
+      Form.setCaption( "Login Forum NA" );
+      if ( httpContext.isSpaRequest( ) )
+      {
+         httpContext.enableJsOutput();
+      }
+   }
+
+   public void init_web_controls( )
+   {
+      cmbavTipologin.setName( "vTIPOLOGIN" );
+      cmbavTipologin.setWebtags( "" );
+      cmbavTipologin.addItem("Profesional", "Profesional", (short)(0));
+      cmbavTipologin.addItem("Agente", "Instituciones", (short)(0));
+      if ( cmbavTipologin.getItemCount() > 0 )
+      {
+         AV17tipologin = cmbavTipologin.getValidValue(AV17tipologin) ;
+         httpContext.ajax_rsp_assign_attri("", false, "AV17tipologin", AV17tipologin);
+      }
+      /* End function init_web_controls */
+   }
+
+   public boolean supportAjaxEvent( )
+   {
+      return true ;
+   }
+
+   public void initializeDynEvents( )
+   {
+      setEventMetadata("REFRESH","{handler:'refresh',iparms:[]");
+      setEventMetadata("REFRESH",",oparms:[]}");
+      setEventMetadata("ENTER","{handler:'e120W2',iparms:[{av:'AV8SecUserPassword',fld:'vSECUSERPASSWORD',pic:''},{av:'cmbavTipologin'},{av:'AV17tipologin',fld:'vTIPOLOGIN',pic:''},{av:'A84ProfesionalUsuario',fld:'PROFESIONALUSUARIO',pic:''},{av:'AV7SecUserName',fld:'vSECUSERNAME',pic:''},{av:'A85ProfesionalPassword',fld:'PROFESIONALPASSWORD',pic:''},{av:'A87ProfesionalHabilitado',fld:'PROFESIONALHABILITADO',pic:''},{av:'AV13SDTsession',fld:'vSDTSESSION',pic:''},{av:'A80ProfesionalId',fld:'PROFESIONALID',pic:'ZZZZZZZZZ9'},{av:'A81ProfesionalApellido',fld:'PROFESIONALAPELLIDO',pic:''},{av:'A88ProfesionalNombre',fld:'PROFESIONALNOMBRE',pic:''},{av:'A82ProfesionalMatricula',fld:'PROFESIONALMATRICULA',pic:''},{av:'A83ProfesionalCUIT',fld:'PROFESIONALCUIT',pic:'ZZZZZZZZZZ9'},{av:'A95usu_matricula',fld:'USU_MATRICULA',pic:''},{av:'AV19ProfeMatricula',fld:'vPROFEMATRICULA',pic:''},{av:'A107AgenteUsuario',fld:'AGENTEUSUARIO',pic:''},{av:'A108AgentePassword',fld:'AGENTEPASSWORD',pic:''},{av:'A101AgenteProfesionalId',fld:'AGENTEPROFESIONALID',pic:'ZZZZZZZZZ9'},{av:'A102AgenteRolId',fld:'AGENTEROLID',pic:'ZZZZZZZZZZ'},{av:'A111AgenteEstado',fld:'AGENTEESTADO',pic:'9'},{av:'A103RolId',fld:'ROLID',pic:'ZZZZZZZZZZ'},{av:'A104RolNombre',fld:'ROLNOMBRE',pic:''},{av:'A98AgenteId',fld:'AGENTEID',pic:'ZZZZZZZZZZ'},{av:'A99AgenteApellido',fld:'AGENTEAPELLIDO',pic:''},{av:'A100AgenteNombre',fld:'AGENTENOMBRE',pic:''},{av:'A109AgenteCUIL',fld:'AGENTECUIL',pic:'ZZZZZZZZZZ9'},{av:'A114PersonaUsuario',fld:'PERSONAUSUARIO',pic:''},{av:'A116PersonaPassword',fld:'PERSONAPASSWORD',pic:''},{av:'A118PersonaEstado',fld:'PERSONAESTADO',pic:'9'},{av:'A119PersonaHabilitada',fld:'PERSONAHABILITADA',pic:''},{av:'A112PersonaId',fld:'PERSONAID',pic:'ZZZZZZZZZZ'},{av:'A113PersonaApellido',fld:'PERSONAAPELLIDO',pic:''},{av:'A115PersonaNombre',fld:'PERSONANOMBRE',pic:''},{av:'A121PersonaDocCuil',fld:'PERSONADOCCUIL',pic:'ZZZZZZZZZZ9'},{av:'AV30varcaptcha',fld:'vVARCAPTCHA',pic:''}]");
+      setEventMetadata("ENTER",",oparms:[{av:'AV9SecUserPasswordEncrypted',fld:'vSECUSERPASSWORDENCRYPTED',pic:''},{av:'AV13SDTsession',fld:'vSDTSESSION',pic:''},{av:'AV19ProfeMatricula',fld:'vPROFEMATRICULA',pic:''},{av:'AV21ProfesionalId',fld:'vPROFESIONALID',pic:'ZZZZZZZZZ9'},{av:'AV22RolId',fld:'vROLID',pic:'ZZZZZZZZZZ'}]}");
+   }
+
+   protected boolean IntegratedSecurityEnabled( )
+   {
+      return false;
+   }
+
+   protected int IntegratedSecurityLevel( )
+   {
+      return 0;
+   }
+
+   protected String IntegratedSecurityPermissionPrefix( )
+   {
+      return "";
+   }
+
+   protected String EncryptURLParameters( )
+   {
+      return "NO";
+   }
+
+   protected void cleanup( )
+   {
+      super.cleanup();
+      CloseOpenCursors();
+   }
+
+   protected void CloseOpenCursors( )
+   {
+   }
+
+   /* Aggregate/select formulas */
+   public void initialize( )
+   {
+      gxfirstwebparm = "" ;
+      gxfirstwebparm_bkp = "" ;
+      Form = new com.genexus.webpanels.GXWebForm();
+      sDynURL = "" ;
+      FormProcess = "" ;
+      bodyStyle = "" ;
+      GXKey = "" ;
+      A84ProfesionalUsuario = "" ;
+      A85ProfesionalPassword = "" ;
+      AV13SDTsession = new com.forumna.SdtSDTSession(remoteHandle, context);
+      A81ProfesionalApellido = "" ;
+      A88ProfesionalNombre = "" ;
+      A82ProfesionalMatricula = "" ;
+      A95usu_matricula = "" ;
+      AV19ProfeMatricula = "" ;
+      A107AgenteUsuario = "" ;
+      A108AgentePassword = "" ;
+      A104RolNombre = "" ;
+      A99AgenteApellido = "" ;
+      A100AgenteNombre = "" ;
+      A114PersonaUsuario = "" ;
+      A116PersonaPassword = "" ;
+      A113PersonaApellido = "" ;
+      A115PersonaNombre = "" ;
+      GX_FocusControl = "" ;
+      sPrefix = "" ;
+      ClassString = "" ;
+      imgLogologin_gximage = "" ;
+      StyleString = "" ;
+      sImgUrl = "" ;
+      lblTxt1_Jsonclick = "" ;
+      TempTags = "" ;
+      AV17tipologin = "" ;
+      AV7SecUserName = "" ;
+      AV8SecUserPassword = "" ;
+      lblForgotpassword_Jsonclick = "" ;
+      ucUccaptcha = new com.genexus.webpanels.GXUserControl();
+      bttBtnenter_Jsonclick = "" ;
+      AV30varcaptcha = "" ;
+      lblVersion_Jsonclick = "" ;
+      ucWwputilities = new com.genexus.webpanels.GXUserControl();
+      sEvt = "" ;
+      EvtGridId = "" ;
+      EvtRowId = "" ;
+      sEvtType = "" ;
+      AV6WebSession = httpContext.getWebSession();
+      AV15CryptoHash = new com.genexus.cryptography.GXHashing();
+      AV9SecUserPasswordEncrypted = "" ;
+      AV10Habilitado = "" ;
+      H000W2_A85ProfesionalPassword = new String[] {""} ;
+      H000W2_n85ProfesionalPassword = new boolean[] {false} ;
+      H000W2_A84ProfesionalUsuario = new String[] {""} ;
+      H000W2_n84ProfesionalUsuario = new boolean[] {false} ;
+      H000W2_A87ProfesionalHabilitado = new boolean[] {false} ;
+      H000W2_n87ProfesionalHabilitado = new boolean[] {false} ;
+      H000W2_A80ProfesionalId = new long[1] ;
+      H000W2_A88ProfesionalNombre = new String[] {""} ;
+      H000W2_n88ProfesionalNombre = new boolean[] {false} ;
+      H000W2_A81ProfesionalApellido = new String[] {""} ;
+      H000W2_n81ProfesionalApellido = new boolean[] {false} ;
+      H000W2_A82ProfesionalMatricula = new String[] {""} ;
+      H000W2_n82ProfesionalMatricula = new boolean[] {false} ;
+      H000W2_A83ProfesionalCUIT = new long[1] ;
+      H000W2_n83ProfesionalCUIT = new boolean[] {false} ;
+      H000W3_A97usu_codigo = new String[] {""} ;
+      H000W3_A95usu_matricula = new String[] {""} ;
+      H000W3_n95usu_matricula = new boolean[] {false} ;
+      H000W4_A108AgentePassword = new String[] {""} ;
+      H000W4_n108AgentePassword = new boolean[] {false} ;
+      H000W4_A107AgenteUsuario = new String[] {""} ;
+      H000W4_n107AgenteUsuario = new boolean[] {false} ;
+      H000W4_A101AgenteProfesionalId = new long[1] ;
+      H000W4_n101AgenteProfesionalId = new boolean[] {false} ;
+      H000W4_A102AgenteRolId = new long[1] ;
+      H000W4_n102AgenteRolId = new boolean[] {false} ;
+      H000W4_A111AgenteEstado = new byte[1] ;
+      H000W4_n111AgenteEstado = new boolean[] {false} ;
+      H000W4_A98AgenteId = new long[1] ;
+      H000W4_A100AgenteNombre = new String[] {""} ;
+      H000W4_n100AgenteNombre = new boolean[] {false} ;
+      H000W4_A99AgenteApellido = new String[] {""} ;
+      H000W4_n99AgenteApellido = new boolean[] {false} ;
+      H000W4_A109AgenteCUIL = new long[1] ;
+      H000W4_n109AgenteCUIL = new boolean[] {false} ;
+      H000W5_A80ProfesionalId = new long[1] ;
+      H000W5_A81ProfesionalApellido = new String[] {""} ;
+      H000W5_n81ProfesionalApellido = new boolean[] {false} ;
+      AV23Institucion = "" ;
+      H000W6_A103RolId = new long[1] ;
+      H000W6_A104RolNombre = new String[] {""} ;
+      H000W6_n104RolNombre = new boolean[] {false} ;
+      AV24RolNombre = "" ;
+      H000W7_A116PersonaPassword = new String[] {""} ;
+      H000W7_n116PersonaPassword = new boolean[] {false} ;
+      H000W7_A114PersonaUsuario = new String[] {""} ;
+      H000W7_n114PersonaUsuario = new boolean[] {false} ;
+      H000W7_A119PersonaHabilitada = new boolean[] {false} ;
+      H000W7_n119PersonaHabilitada = new boolean[] {false} ;
+      H000W7_A118PersonaEstado = new byte[1] ;
+      H000W7_n118PersonaEstado = new boolean[] {false} ;
+      H000W7_A112PersonaId = new long[1] ;
+      H000W7_A115PersonaNombre = new String[] {""} ;
+      H000W7_n115PersonaNombre = new boolean[] {false} ;
+      H000W7_A113PersonaApellido = new String[] {""} ;
+      H000W7_n113PersonaApellido = new boolean[] {false} ;
+      H000W7_A121PersonaDocCuil = new long[1] ;
+      H000W7_n121PersonaDocCuil = new boolean[] {false} ;
+      GXv_boolean2 = new boolean[1] ;
+      BackMsgLst = new com.genexus.internet.MsgList();
+      LclMsgLst = new com.genexus.internet.MsgList();
+      pr_default = new DataStoreProvider(context, remoteHandle, new com.forumna.login__default(),
+         new Object[] {
+             new Object[] {
+            H000W3_A97usu_codigo, H000W3_A95usu_matricula, H000W3_n95usu_matricula
+            }
+         }
+      );
+      pr_forum = new DataStoreProvider(context, remoteHandle, new com.forumna.login__forum(),
+         new Object[] {
+             new Object[] {
+            H000W2_A85ProfesionalPassword, H000W2_n85ProfesionalPassword, H000W2_A84ProfesionalUsuario, H000W2_n84ProfesionalUsuario, H000W2_A87ProfesionalHabilitado, H000W2_n87ProfesionalHabilitado, H000W2_A80ProfesionalId, H000W2_A88ProfesionalNombre, H000W2_n88ProfesionalNombre, H000W2_A81ProfesionalApellido,
+            H000W2_n81ProfesionalApellido, H000W2_A82ProfesionalMatricula, H000W2_n82ProfesionalMatricula, H000W2_A83ProfesionalCUIT, H000W2_n83ProfesionalCUIT
+            }
+            , new Object[] {
+            H000W4_A108AgentePassword, H000W4_n108AgentePassword, H000W4_A107AgenteUsuario, H000W4_n107AgenteUsuario, H000W4_A101AgenteProfesionalId, H000W4_n101AgenteProfesionalId, H000W4_A102AgenteRolId, H000W4_n102AgenteRolId, H000W4_A111AgenteEstado, H000W4_n111AgenteEstado,
+            H000W4_A98AgenteId, H000W4_A100AgenteNombre, H000W4_n100AgenteNombre, H000W4_A99AgenteApellido, H000W4_n99AgenteApellido, H000W4_A109AgenteCUIL, H000W4_n109AgenteCUIL
+            }
+            , new Object[] {
+            H000W5_A80ProfesionalId, H000W5_A81ProfesionalApellido, H000W5_n81ProfesionalApellido
+            }
+            , new Object[] {
+            H000W6_A103RolId, H000W6_A104RolNombre, H000W6_n104RolNombre
+            }
+            , new Object[] {
+            H000W7_A116PersonaPassword, H000W7_n116PersonaPassword, H000W7_A114PersonaUsuario, H000W7_n114PersonaUsuario, H000W7_A119PersonaHabilitada, H000W7_n119PersonaHabilitada, H000W7_A118PersonaEstado, H000W7_n118PersonaEstado, H000W7_A112PersonaId, H000W7_A115PersonaNombre,
+            H000W7_n115PersonaNombre, H000W7_A113PersonaApellido, H000W7_n113PersonaApellido, H000W7_A121PersonaDocCuil, H000W7_n121PersonaDocCuil
+            }
+         }
+      );
+      /* GeneXus formulas. */
+   }
+
+   private byte nGotPars ;
+   private byte GxWebError ;
+   private byte gxajaxcallmode ;
+   private byte A111AgenteEstado ;
+   private byte A118PersonaEstado ;
+   private byte lblTxt1_Fontbold ;
+   private byte nDonePA ;
+   private byte nGXWrapped ;
+   private short nRcdExists_8 ;
+   private short nIsMod_8 ;
+   private short nRcdExists_5 ;
+   private short nIsMod_5 ;
+   private short nRcdExists_7 ;
+   private short nIsMod_7 ;
+   private short nRcdExists_6 ;
+   private short nIsMod_6 ;
+   private short nRcdExists_4 ;
+   private short nIsMod_4 ;
+   private short nRcdExists_3 ;
+   private short nIsMod_3 ;
+   private short wbEnd ;
+   private short wbStart ;
+   private short gxcookieaux ;
+   private int lblTxt1_Fontsize ;
+   private int lblTxt1_Forecolor ;
+   private int edtavSecusername_Enabled ;
+   private int edtavSecuserpassword_Enabled ;
+   private int edtavVarcaptcha_Enabled ;
+   private int idxLst ;
+   private long A80ProfesionalId ;
+   private long A83ProfesionalCUIT ;
+   private long A101AgenteProfesionalId ;
+   private long A102AgenteRolId ;
+   private long A103RolId ;
+   private long A98AgenteId ;
+   private long A109AgenteCUIL ;
+   private long A112PersonaId ;
+   private long A121PersonaDocCuil ;
+   private long AV21ProfesionalId ;
+   private long AV22RolId ;
+   private String gxfirstwebparm ;
+   private String gxfirstwebparm_bkp ;
+   private String sDynURL ;
+   private String FormProcess ;
+   private String bodyStyle ;
+   private String GXKey ;
+   private String Wwputilities_Comboloadtype ;
+   private String GX_FocusControl ;
+   private String sPrefix ;
+   private String divLayoutmaintable_Internalname ;
+   private String divLayoutmaintable_Class ;
+   private String divTablemain_Internalname ;
+   private String divTablelogincontent_Internalname ;
+   private String divTablelogin_Internalname ;
+   private String ClassString ;
+   private String imgLogologin_gximage ;
+   private String StyleString ;
+   private String sImgUrl ;
+   private String imgLogologin_Internalname ;
+   private String lblTxt1_Internalname ;
+   private String lblTxt1_Jsonclick ;
+   private String divUnnamedtable1_Internalname ;
+   private String TempTags ;
+   private String edtavSecusername_Internalname ;
+   private String edtavSecusername_Jsonclick ;
+   private String edtavSecuserpassword_Internalname ;
+   private String edtavSecuserpassword_Jsonclick ;
+   private String lblForgotpassword_Internalname ;
+   private String lblForgotpassword_Jsonclick ;
+   private String Uccaptcha_Internalname ;
+   private String bttBtnenter_Internalname ;
+   private String bttBtnenter_Jsonclick ;
+   private String divCelvarcaptcha_Internalname ;
+   private String edtavVarcaptcha_Internalname ;
+   private String lblVersion_Internalname ;
+   private String lblVersion_Jsonclick ;
+   private String Wwputilities_Internalname ;
+   private String sEvt ;
+   private String EvtGridId ;
+   private String EvtRowId ;
+   private String sEvtType ;
+   private boolean entryPointCalled ;
+   private boolean toggleJsOutput ;
+   private boolean A87ProfesionalHabilitado ;
+   private boolean A119PersonaHabilitada ;
+   private boolean Wwputilities_Enablefixobjectfitcover ;
+   private boolean Wwputilities_Enableconvertcombotobootstrapselect ;
+   private boolean Wwputilities_Allowcolumnresizing ;
+   private boolean Wwputilities_Allowcolumnreordering ;
+   private boolean Wwputilities_Allowcolumnsrestore ;
+   private boolean wbLoad ;
+   private boolean Rfr0gs ;
+   private boolean wbErr ;
+   private boolean gxdyncontrolsrefreshing ;
+   private boolean returnInSub ;
+   private boolean AV25CaptchaValid ;
+   private boolean AV5LogInSuccessful ;
+   private boolean AV12UsuPass ;
+   private boolean n85ProfesionalPassword ;
+   private boolean n84ProfesionalUsuario ;
+   private boolean n87ProfesionalHabilitado ;
+   private boolean n88ProfesionalNombre ;
+   private boolean n81ProfesionalApellido ;
+   private boolean n82ProfesionalMatricula ;
+   private boolean n83ProfesionalCUIT ;
+   private boolean AV20MatriculaForumIurix ;
+   private boolean n95usu_matricula ;
+   private boolean n108AgentePassword ;
+   private boolean n107AgenteUsuario ;
+   private boolean n101AgenteProfesionalId ;
+   private boolean n102AgenteRolId ;
+   private boolean n111AgenteEstado ;
+   private boolean n100AgenteNombre ;
+   private boolean n99AgenteApellido ;
+   private boolean n109AgenteCUIL ;
+   private boolean n104RolNombre ;
+   private boolean n116PersonaPassword ;
+   private boolean n114PersonaUsuario ;
+   private boolean n119PersonaHabilitada ;
+   private boolean n118PersonaEstado ;
+   private boolean n115PersonaNombre ;
+   private boolean n113PersonaApellido ;
+   private boolean n121PersonaDocCuil ;
+   private boolean GXt_boolean1 ;
+   private boolean GXv_boolean2[] ;
+   private String A84ProfesionalUsuario ;
+   private String A85ProfesionalPassword ;
+   private String A81ProfesionalApellido ;
+   private String A88ProfesionalNombre ;
+   private String A82ProfesionalMatricula ;
+   private String A95usu_matricula ;
+   private String AV19ProfeMatricula ;
+   private String A107AgenteUsuario ;
+   private String A108AgentePassword ;
+   private String A104RolNombre ;
+   private String A99AgenteApellido ;
+   private String A100AgenteNombre ;
+   private String A114PersonaUsuario ;
+   private String A116PersonaPassword ;
+   private String A113PersonaApellido ;
+   private String A115PersonaNombre ;
+   private String AV17tipologin ;
+   private String AV7SecUserName ;
+   private String AV8SecUserPassword ;
+   private String AV30varcaptcha ;
+   private String AV9SecUserPasswordEncrypted ;
+   private String AV10Habilitado ;
+   private String AV23Institucion ;
+   private String AV24RolNombre ;
+   private com.genexus.internet.MsgList BackMsgLst ;
+   private com.genexus.internet.MsgList LclMsgLst ;
+   private com.genexus.webpanels.GXUserControl ucUccaptcha ;
+   private com.genexus.webpanels.GXUserControl ucWwputilities ;
+   private com.genexus.cryptography.GXHashing AV15CryptoHash ;
+   private com.genexus.webpanels.GXWebForm Form ;
+   private com.genexus.webpanels.WebSession AV6WebSession ;
+   private HTMLChoice cmbavTipologin ;
+   private com.forumna.SdtSDTSession AV13SDTsession ;
+   private IDataStoreProvider pr_forum ;
+   private String[] H000W2_A85ProfesionalPassword ;
+   private boolean[] H000W2_n85ProfesionalPassword ;
+   private String[] H000W2_A84ProfesionalUsuario ;
+   private boolean[] H000W2_n84ProfesionalUsuario ;
+   private boolean[] H000W2_A87ProfesionalHabilitado ;
+   private boolean[] H000W2_n87ProfesionalHabilitado ;
+   private long[] H000W2_A80ProfesionalId ;
+   private String[] H000W2_A88ProfesionalNombre ;
+   private boolean[] H000W2_n88ProfesionalNombre ;
+   private String[] H000W2_A81ProfesionalApellido ;
+   private boolean[] H000W2_n81ProfesionalApellido ;
+   private String[] H000W2_A82ProfesionalMatricula ;
+   private boolean[] H000W2_n82ProfesionalMatricula ;
+   private long[] H000W2_A83ProfesionalCUIT ;
+   private boolean[] H000W2_n83ProfesionalCUIT ;
+   private IDataStoreProvider pr_default ;
+   private String[] H000W3_A97usu_codigo ;
+   private String[] H000W3_A95usu_matricula ;
+   private boolean[] H000W3_n95usu_matricula ;
+   private String[] H000W4_A108AgentePassword ;
+   private boolean[] H000W4_n108AgentePassword ;
+   private String[] H000W4_A107AgenteUsuario ;
+   private boolean[] H000W4_n107AgenteUsuario ;
+   private long[] H000W4_A101AgenteProfesionalId ;
+   private boolean[] H000W4_n101AgenteProfesionalId ;
+   private long[] H000W4_A102AgenteRolId ;
+   private boolean[] H000W4_n102AgenteRolId ;
+   private byte[] H000W4_A111AgenteEstado ;
+   private boolean[] H000W4_n111AgenteEstado ;
+   private long[] H000W4_A98AgenteId ;
+   private String[] H000W4_A100AgenteNombre ;
+   private boolean[] H000W4_n100AgenteNombre ;
+   private String[] H000W4_A99AgenteApellido ;
+   private boolean[] H000W4_n99AgenteApellido ;
+   private long[] H000W4_A109AgenteCUIL ;
+   private boolean[] H000W4_n109AgenteCUIL ;
+   private long[] H000W5_A80ProfesionalId ;
+   private String[] H000W5_A81ProfesionalApellido ;
+   private boolean[] H000W5_n81ProfesionalApellido ;
+   private long[] H000W6_A103RolId ;
+   private String[] H000W6_A104RolNombre ;
+   private boolean[] H000W6_n104RolNombre ;
+   private String[] H000W7_A116PersonaPassword ;
+   private boolean[] H000W7_n116PersonaPassword ;
+   private String[] H000W7_A114PersonaUsuario ;
+   private boolean[] H000W7_n114PersonaUsuario ;
+   private boolean[] H000W7_A119PersonaHabilitada ;
+   private boolean[] H000W7_n119PersonaHabilitada ;
+   private byte[] H000W7_A118PersonaEstado ;
+   private boolean[] H000W7_n118PersonaEstado ;
+   private long[] H000W7_A112PersonaId ;
+   private String[] H000W7_A115PersonaNombre ;
+   private boolean[] H000W7_n115PersonaNombre ;
+   private String[] H000W7_A113PersonaApellido ;
+   private boolean[] H000W7_n113PersonaApellido ;
+   private long[] H000W7_A121PersonaDocCuil ;
+   private boolean[] H000W7_n121PersonaDocCuil ;
+}
+
+final  class login__default extends DataStoreHelperBase implements ILocalDataStoreHelper
+{
+   public Cursor[] getCursors( )
+   {
+      return new Cursor[] {
+          new ForEachCursor("H000W3", "SELECT usu_codigo, usu_matricula FROM Public.usuario WHERE RTRIM(LTRIM(usu_matricula)) = ( RTRIM(LTRIM(?))) ORDER BY usu_codigo  LIMIT 1",false, GX_NOMASK + GX_MASKLOOPLOCK, false, this,1, GxCacheFrequency.OFF,true )
+      };
+   }
+
+   public void getResults( int cursor ,
+                           IFieldGetter rslt ,
+                           Object[] buf ) throws SQLException
+   {
+      switch ( cursor )
+      {
+            case 0 :
+               ((String[]) buf[0])[0] = rslt.getVarchar(1);
+               ((String[]) buf[1])[0] = rslt.getVarchar(2);
+               ((boolean[]) buf[2])[0] = rslt.wasNull();
+               return;
+      }
+   }
+
+   public void setParameters( int cursor ,
+                              IFieldSetter stmt ,
+                              Object[] parms ) throws SQLException
+   {
+      switch ( cursor )
+      {
+            case 0 :
+               stmt.setVarchar(1, (String)parms[0], 20);
+               return;
+      }
+   }
+
+}
+
+final  class login__forum extends DataStoreHelperBase implements ILocalDataStoreHelper
+{
+   public Cursor[] getCursors( )
+   {
+      return new Cursor[] {
+          new ForEachCursor("H000W2", "SELECT ProfesionalPassword, ProfesionalUsuario, ProfesionalHabilitado, ProfesionalId, ProfesionalNombre, ProfesionalApellido, ProfesionalMatricula, ProfesionalCUIT FROM Public.profesional WHERE (ProfesionalUsuario = ( RTRIM(LTRIM(?)))) AND (LOWER(ProfesionalPassword) = ( LOWER(?))) ORDER BY ProfesionalId  LIMIT 1",false, GX_NOMASK + GX_MASKLOOPLOCK, false, this,1, GxCacheFrequency.OFF,true )
+         ,new ForEachCursor("H000W4", "SELECT AgentePassword, AgenteUsuario, AgenteProfesionalId, AgenteRolId, AgenteEstado, AgenteId, AgenteNombre, AgenteApellido, AgenteCUIL FROM Public.Agente WHERE (AgenteUsuario = ( RTRIM(LTRIM(?)))) AND (LOWER(AgentePassword) = ( LOWER(?))) ORDER BY AgenteId  LIMIT 1",false, GX_NOMASK + GX_MASKLOOPLOCK, false, this,1, GxCacheFrequency.OFF,true )
+         ,new ForEachCursor("H000W5", "SELECT ProfesionalId, ProfesionalApellido FROM Public.profesional WHERE ProfesionalId = ? ORDER BY ProfesionalId  LIMIT 1",false, GX_NOMASK + GX_MASKLOOPLOCK, false, this,1, GxCacheFrequency.OFF,true )
+         ,new ForEachCursor("H000W6", "SELECT RolId, RolNombre FROM Public.Rol WHERE RolId = ? ORDER BY RolId  LIMIT 1",false, GX_NOMASK + GX_MASKLOOPLOCK, false, this,1, GxCacheFrequency.OFF,true )
+         ,new ForEachCursor("H000W7", "SELECT PersonaPassword, PersonaUsuario, PersonaHabilitada, PersonaEstado, PersonaId, PersonaNombre, PersonaApellido, PersonaDocCuil FROM Public.persona WHERE (PersonaUsuario = ( RTRIM(LTRIM(?)))) AND (LOWER(PersonaPassword) = ( LOWER(?))) ORDER BY PersonaId  LIMIT 1",false, GX_NOMASK + GX_MASKLOOPLOCK, false, this,1, GxCacheFrequency.OFF,true )
+      };
+   }
+
+   public void getResults( int cursor ,
+                           IFieldGetter rslt ,
+                           Object[] buf ) throws SQLException
+   {
+      switch ( cursor )
+      {
+            case 0 :
+               ((String[]) buf[0])[0] = rslt.getVarchar(1);
+               ((boolean[]) buf[1])[0] = rslt.wasNull();
+               ((String[]) buf[2])[0] = rslt.getVarchar(2);
+               ((boolean[]) buf[3])[0] = rslt.wasNull();
+               ((boolean[]) buf[4])[0] = rslt.getBoolean(3);
+               ((boolean[]) buf[5])[0] = rslt.wasNull();
+               ((long[]) buf[6])[0] = rslt.getLong(4);
+               ((String[]) buf[7])[0] = rslt.getVarchar(5);
+               ((boolean[]) buf[8])[0] = rslt.wasNull();
+               ((String[]) buf[9])[0] = rslt.getVarchar(6);
+               ((boolean[]) buf[10])[0] = rslt.wasNull();
+               ((String[]) buf[11])[0] = rslt.getVarchar(7);
+               ((boolean[]) buf[12])[0] = rslt.wasNull();
+               ((long[]) buf[13])[0] = rslt.getLong(8);
+               ((boolean[]) buf[14])[0] = rslt.wasNull();
+               return;
+            case 1 :
+               ((String[]) buf[0])[0] = rslt.getVarchar(1);
+               ((boolean[]) buf[1])[0] = rslt.wasNull();
+               ((String[]) buf[2])[0] = rslt.getVarchar(2);
+               ((boolean[]) buf[3])[0] = rslt.wasNull();
+               ((long[]) buf[4])[0] = rslt.getLong(3);
+               ((boolean[]) buf[5])[0] = rslt.wasNull();
+               ((long[]) buf[6])[0] = rslt.getLong(4);
+               ((boolean[]) buf[7])[0] = rslt.wasNull();
+               ((byte[]) buf[8])[0] = rslt.getByte(5);
+               ((boolean[]) buf[9])[0] = rslt.wasNull();
+               ((long[]) buf[10])[0] = rslt.getLong(6);
+               ((String[]) buf[11])[0] = rslt.getVarchar(7);
+               ((boolean[]) buf[12])[0] = rslt.wasNull();
+               ((String[]) buf[13])[0] = rslt.getVarchar(8);
+               ((boolean[]) buf[14])[0] = rslt.wasNull();
+               ((long[]) buf[15])[0] = rslt.getLong(9);
+               ((boolean[]) buf[16])[0] = rslt.wasNull();
+               return;
+            case 2 :
+               ((long[]) buf[0])[0] = rslt.getLong(1);
+               ((String[]) buf[1])[0] = rslt.getVarchar(2);
+               ((boolean[]) buf[2])[0] = rslt.wasNull();
+               return;
+            case 3 :
+               ((long[]) buf[0])[0] = rslt.getLong(1);
+               ((String[]) buf[1])[0] = rslt.getVarchar(2);
+               ((boolean[]) buf[2])[0] = rslt.wasNull();
+               return;
+            case 4 :
+               ((String[]) buf[0])[0] = rslt.getVarchar(1);
+               ((boolean[]) buf[1])[0] = rslt.wasNull();
+               ((String[]) buf[2])[0] = rslt.getVarchar(2);
+               ((boolean[]) buf[3])[0] = rslt.wasNull();
+               ((boolean[]) buf[4])[0] = rslt.getBoolean(3);
+               ((boolean[]) buf[5])[0] = rslt.wasNull();
+               ((byte[]) buf[6])[0] = rslt.getByte(4);
+               ((boolean[]) buf[7])[0] = rslt.wasNull();
+               ((long[]) buf[8])[0] = rslt.getLong(5);
+               ((String[]) buf[9])[0] = rslt.getVarchar(6);
+               ((boolean[]) buf[10])[0] = rslt.wasNull();
+               ((String[]) buf[11])[0] = rslt.getVarchar(7);
+               ((boolean[]) buf[12])[0] = rslt.wasNull();
+               ((long[]) buf[13])[0] = rslt.getLong(8);
+               ((boolean[]) buf[14])[0] = rslt.wasNull();
+               return;
+      }
+   }
+
+   public void setParameters( int cursor ,
+                              IFieldSetter stmt ,
+                              Object[] parms ) throws SQLException
+   {
+      switch ( cursor )
+      {
+            case 0 :
+               stmt.setVarchar(1, (String)parms[0], 100);
+               stmt.setVarchar(2, (String)parms[1], 300);
+               return;
+            case 1 :
+               stmt.setVarchar(1, (String)parms[0], 100);
+               stmt.setVarchar(2, (String)parms[1], 300);
+               return;
+            case 2 :
+               stmt.setLong(1, ((Number) parms[0]).longValue());
+               return;
+            case 3 :
+               stmt.setLong(1, ((Number) parms[0]).longValue());
+               return;
+            case 4 :
+               stmt.setVarchar(1, (String)parms[0], 100);
+               stmt.setVarchar(2, (String)parms[1], 300);
+               return;
+      }
+   }
+
+   public String getDataStoreName( )
+   {
+      return "FORUM";
+   }
+
+}
+
